@@ -4,12 +4,13 @@ from Bio import SeqIO
 from argparse import ArgumentParser
 import re
 
+HEADER = "\t".join(["id", "pg4s_and_scores", "total_score",
+                    "length_normalized_score"])
 
-def score_matches(matches):
-    score = 0
-    for m in matches:
-        score += score_sequence(m.group(0))
-    return score
+def get_pg4s(seq):
+    pattern = r'(([gG]{3,}[aAcCtTgGuU]{1,7}){3,}[gG]{3,})'
+    matches = re.finditer(pattern, seq)
+    return [m.group(0) for m in matches]
 
 def score_sequence(seq):
     """
@@ -36,8 +37,11 @@ if __name__ == "__main__":
     parser.add_argument("fasta", help="A FASTA file of sequences")
     args = parser.parse_args()
 
-    pattern = r'(([gG]{3,}[aAcCtTgGuU]{1,7}){3,}[gG]{3,})'
     with open(args.fasta) as in_handle:
+        print HEADER
         for record in SeqIO.parse(in_handle, "fasta"):
-            matches = re.finditer(pattern, str(record.seq))
-            print record.id, score_matches(matches)
+            pg4s = get_pg4s(str(record.seq))
+            scores = map(score_sequence, pg4s)
+            total = sum(scores)
+            print "\t".join(map(str, [record.id, zip(pg4s, scores), total,
+                                  total / len(record.seq)]))
