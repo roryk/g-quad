@@ -10,11 +10,6 @@ HEADER = "\t".join(["id", "pg4s_and_scores", "total_score",
 def get_pg4s(seq):
     pattern = r'(([gG]{3,}[aAcCtTgGuU]{1,7}){3,}[gG]{3,})'
     matches = re.finditer(pattern, seq)
-    return [m.group(0) for m in matches]
-
-def get_pg4s(seq):
-    pattern = r'(([gG]{3,}[aAcCtTgGuU]{1,7}){3,}[gG]{3,})'
-    matches = re.finditer(pattern, seq)
     context = get_context(seq)
     return filter(lambda x: x, map(context, matches))
 
