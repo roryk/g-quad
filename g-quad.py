@@ -12,6 +12,23 @@ def get_pg4s(seq):
     matches = re.finditer(pattern, seq)
     return [m.group(0) for m in matches]
 
+def get_pg4s(seq):
+    pattern = r'(([gG]{3,}[aAcCtTgGuU]{1,7}){3,}[gG]{3,})'
+    matches = re.finditer(pattern, seq)
+    context = get_context(seq)
+    return filter(lambda x: x, map(context, matches))
+
+def get_context(seq):
+    # return a function that extracts the genomic context of a match
+    def context(match):
+        CONTEXT_LENGTH = 50
+        context_start = match.span()[0] - CONTEXT_LENGTH
+        context_end = match.span()[1] + CONTEXT_LENGTH
+        if context_start < 0 or context_end > len(seq):
+            return None
+        return seq[context_start:context_end]
+    return context
+
 def score_sequence(seq):
     """
     implementation of G-quadraplex scoring from this paper
